@@ -53,8 +53,17 @@ apply_coef_model <- function(covs,
                              coef_model)
 {
   
-  MODEL_grid <- coef_model[names(coef_model)[1]] +
-    sum(covs * coef_model[names(covs)])
+  if(length(coef_model) < 3){
+    
+    MODEL_grid <- coef_model[names(coef_model)[1]] +
+      covs * coef_model[names(covs)]
+    
+  } else {
+    
+    MODEL_grid <- coef_model[names(coef_model)[1]] +
+      sum(covs * coef_model[names(covs)])
+  }
+  
   MODEL_grid <- round(MODEL_grid, 2)
   
   names(MODEL_grid) <- "MODEL"

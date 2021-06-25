@@ -5,11 +5,19 @@ make_Normal_coVariables <- function(month_value,
 {
   
   # covs
-  covs_list$static
-  covs_dynamic <- lapply(covs_list$dynamic, function(x) x[[month_value]])
+  if(anyNA(covs_list)){
+    
+    only_covs_list <- Filter(Negate(anyNA), covs_list)
+    covs_dynamic <- lapply(only_covs_list$dynamic, function(x) x[[month_value]]) # there is always a dynamic covariable
+    covs_data <- raster::brick(raster::stack(raster::stack(covs_dynamic)))
+    
+  } else {
+    
+    covs_dynamic <- lapply(covs_list$dynamic, function(x) x[[month_value]])
+    covs_data <- raster::brick(raster::stack(raster::stack(covs_dynamic),
+                                             raster::stack(covs_list$static)))
+  }
   
-  covs_data <- raster::brick(raster::stack(raster::stack(covs_dynamic),
-                                           raster::stack(covs_list$static)))
   # covs_data <- (covs_data - raster::cellStats(covs_data, mean)) / raster::cellStats(covs_data, sd)
   
   # obs

@@ -16,7 +16,7 @@ PM_equation = urllib.request.urlopen("https://git.io/J3Iy5")
 exec(PM_equation.read())
 
 # range time for computation
-range_time = pd.date_range("1981-01-01", "1981-01-10", freq="d")
+range_time = pd.date_range("1981-01-01", "2016-12-31", freq="d")
 
 # path files
 file_path_grids = "data/processed/gridded/"

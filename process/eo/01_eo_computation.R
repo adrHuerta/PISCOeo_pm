@@ -12,8 +12,8 @@ import xarray as xr
 from joblib import Parallel, delayed
 
 # (FAO56) Penman-Monteith (PM) equation for FT
-PM_function = urllib.request.urlopen("https://git.io/J3Iy5")
-exec(PM_function.read())
+PM_equation = urllib.request.urlopen("https://git.io/J3Iy5")
+exec(PM_equation.read())
 
 # range time for computation
 range_time = pd.date_range("1981-01-01", "1981-01-10", freq="d")

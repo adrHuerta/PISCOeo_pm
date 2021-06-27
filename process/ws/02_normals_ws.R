@@ -8,7 +8,7 @@ source('./src/from_PISCOt/Merging/MG_make_single_point.R')
 source('./src/from_PISCOt/Merging/MG_normal_anomaly_values.R')
 
 # data
-qc_data <- readRDS("./data/processed/obs/ws/qc_data_ws_obs.RDS")
+qc_data <- readRDS("./data/processed/obs/ws/qc_ws_obs.RDS")
 
 # grid data
 gridded_data <- raster::brick("./data/processed/gridded/co_variables/DEM.nc")[[1]]

@@ -7,14 +7,14 @@ library(gstat)
 source('./src/from_PISCOt/Merging/MG_make_covariables.R')
 source('./src/from_PISCOt/Merging/MG_RK.R')
 
-output_normals <- "./data/processed/gridded/sub_variables/normals/td"
+output_normals <- "./data/processed/gridded/sub_variables/normals"
 
 # obs
 qc_data <- readRDS("./data/processed/obs/td/Normals_OBS_td.RDS")
 
 # gridded
 LST_mean <- raster::brick("./data/processed/gridded/co_variables/LST_mean.nc")
-DEM <- raster::raster("./data/processed/gridded/co_variables/DEM.nc")
+DEM <- raster::raster("./data/processed/gridded/co_variables/DEM.nc")/1000
 X <- raster::raster("./data/processed/gridded/co_variables/X.nc")
 Y <- raster::raster("./data/processed/gridded/co_variables/Y.nc")
 
@@ -30,11 +30,12 @@ for(i in 1:12){
                                   obs = qc_data)
   
   grid_i <- RK(obs_cov_data = cc_i, resFitting = 10)
+  grid_i <- round(grid_i, 2)
 
-  
+
   raster::writeRaster(x = grid_i, 
                       filename = file.path(output_normals, 
-                                           sprintf("Normals_%s/td_%02d.nc", "td",  i)),
+                                           sprintf("%s/td_%02d.nc", "td",  i)),
                       datatype = 'FLT4S', force_v4 = TRUE, compression = 7)
   
   }

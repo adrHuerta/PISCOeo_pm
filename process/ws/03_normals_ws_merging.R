@@ -7,7 +7,7 @@ library(gstat)
 source('./src/from_PISCOt/Merging/MG_make_covariables.R')
 source('./src/from_PISCOt/Merging/MG_RK.R')
 
-output_normals <- "./data/processed/gridded/sub_variables/normals/ws"
+output_normals <- "./data/processed/gridded/sub_variables/normals"
 
 # obs
 qc_data <- readRDS("./data/processed/obs/ws/Normals_OBS_ws.RDS")
@@ -28,11 +28,11 @@ for(i in 1:12){
                                   obs = qc_data)
   
   grid_i <- RK(obs_cov_data = cc_i, resFitting = 10)
-  grid_i <- grid_i^2
+  grid_i <- round(grid_i^2, 2)
   
   raster::writeRaster(x = grid_i, 
                       filename = file.path(output_normals, 
-                                           sprintf("Normals_%s/ws_%02d.nc", "ws",  i)),
+                                           sprintf("%s/ws_%02d.nc", "ws",  i)),
                       datatype = 'FLT4S', force_v4 = TRUE, compression = 7)
   
 }

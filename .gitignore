@@ -40,3 +40,9 @@ vignettes/*.pdf
 
 # heavy files
 /data
+**.csv
+**.RDS
+
+# Figures
+**.png
+**.pdf

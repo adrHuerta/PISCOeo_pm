@@ -42,10 +42,9 @@ ws_qcg[ws_qcg == -1] <- 1
 ws_qca <- ws_data*ws_qcg
 
 # qc5: visual control
-graph_hmg(ws_qca,'data/raw/obs/ws/ws_hmg/', 'ws')
+# graph_hmg(ws_qca,'data/raw/obs/ws/ws_hmg/', 'ws')
 
 # delete year with errors
-# stations that should be deleted: c("X117043", "X116060", "X116011")
 ws_qcv <- delet_year(ws_qca, ws_visual_qc(ws_qca))
 
 # minimum n years with 365 days
@@ -61,7 +60,6 @@ ws_xyz_qcf <- sel_xyz_wqc(ws_qcmd, ws_xyz)
 row.names(ws_xyz_qcf) <- NULL
 
 ws_data_xts <- xts(ws_data_qcf, order.by = as.Date(row.names(ws_data_qcf)))
-ws_climatology <- data.frame(t(hydroTSM::monthlyfunction(ws_data_xts, FUN=mean)))
 
 ws_wqc <- list(values = ws_data_xts, xyz = ws_xyz_qcf)
 saveRDS(ws_wqc, 'data/processed/obs/ws/qc_ws_obs.RDS')

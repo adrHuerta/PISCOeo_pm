@@ -266,7 +266,7 @@ ws_visual_qc <- function(clima_data){
                     data.frame(E297=c(1981:2019)),
                     data.frame(E298=c(1981:2004, 2016:2019)),
                     data.frame(E299=c(1981:2008, 2019)),
-                    data.frame(E300=c(1981:2008, 2014, 2018:2019)),
+                    data.frame(E300=c(1981:2019)), # values too high
                     data.frame(E301=c(1981:2013)),
                     data.frame(E302=c(1981:2019)),
                     data.frame(E303=c(1981:2012)),
@@ -298,7 +298,7 @@ ws_visual_qc <- function(clima_data){
                     data.frame(E330=c(2000:2010, 2016:2019)),
                     data.frame(E331=c(1981:2019)),
                     data.frame(E332=c(1981:2005, 2015)),
-                    data.frame(E333=c(1981:2006, 2018:2019)),
+                    data.frame(E333=c(1981:2019)), # non spatial coherence
                     data.frame(E334=c(1981:2009)),
                     data.frame(E335=c(1981:2019)),
                     data.frame(E336=c(1981:2019)),
@@ -383,7 +383,7 @@ ws_visual_qc <- function(clima_data){
                     data.frame(E428=c(1981:2004, 2006, 2009:2010, 2015:2016, 2018:2019)),
                     data.frame(E429=c(2010:2019)),
                     data.frame(E431=c(1981:2019)),
-                    data.frame(E432=c(2003, 2014:2019)),
+                    data.frame(E432=c(1981:2019)), # values too high
                     data.frame(E433=c(1981:2019)),
                     data.frame(E206=c(1981:2019)))
   

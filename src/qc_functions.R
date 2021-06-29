@@ -17,7 +17,8 @@ year2day <- function(clim_year){
   return(yrs_f)
 }
 
-qc1_func <- function(val_clim, recop_temp, umbral){
+qc1_func <- function(val_clim, umbral){
+  recop_temp <- val_clim
   for (i in 1:ncol(val_clim)) {
     repx <- rle(val_clim[,i])[[1]]
     rep_cs <- cumsum(repx)
@@ -133,7 +134,7 @@ qc4_func <- function(values = ws_data, xyz = ws_xyz, min_st = mins_ws, umb = 100
                                                   rowMeans(dplyr::select(vect_vc, p1,p2,p3,p4), na.rm = TRUE)))
     comp_vec <- data.frame(OB=vect_ob, VC=vect_vc[,5])
     comp_vec <- dplyr::mutate(comp_vec, DIF = comp_vec[,1]-comp_vec[,2])
-    est_wq4[,w] <- round(comp_vec[,3],1)
+    est_wq4[,w] <- comp_vec[,3]
   }
   est_wq4[est_wq4 == 'NaN'] <- NA
   est_wq4[is.na(est_wq4)] <- 0
@@ -231,13 +232,13 @@ delet_year <- function(clima_data, dlt_station){
   return(clima_fmi)
 }
 
-qc_3y365 <- function(clima_data){
+qc_ny365 <- function(clima_data = ws_data, nyear=5){
   clima_ts <- xts(x = clima_data, order.by = as.Date(row.names(clima_data)))
   clima_yts <- as.data.frame(apply.yearly(clima_ts, FUN=apply, MARGIN=2, mean_cn, n=365))
   clima_yts[clima_yts < 1000] <- 1
   clima_yts_rs <- data.frame(syt = colSums(clima_yts, na.rm = T))
-  clima_yts_rs[clima_yts_rs<3] <- NA
-  clima_yts_rs[clima_yts_rs>0] <- 1
+  clima_yts_rs[clima_yts_rs < nyear] <- NA
+  clima_yts_rs[clima_yts_rs > 0] <- 1
   for (i in 1:nrow(clima_yts_rs)) {
     if(is.na((clima_yts_rs$syt)[i])){
       clima_data[,i] <- NA
@@ -248,32 +249,15 @@ qc_3y365 <- function(clima_data){
   return(clima_data)
 }
 
-qc_5y365 <- function(clima_data){
-  clima_ts <- xts(x = clima_data, order.by = as.Date(row.names(clima_data)))
-  clima_yts <- as.data.frame(apply.yearly(clima_ts, FUN=apply, MARGIN=2, mean_cn, n=365))
-  clima_yts[clima_yts < 1000] <- 1
-  clima_yts_rs <- data.frame(syt = colSums(clima_yts, na.rm = T))
-  clima_yts_rs[clima_yts_rs<5] <- NA
-  clima_yts_rs[clima_yts_rs>0] <- 1
-  for (i in 1:nrow(clima_yts_rs)) {
-    if(is.na((clima_yts_rs$syt)[i])){
-      clima_data[,i] <- NA
-    }else{
-      
-    }
-  }
-  return(clima_data)
-}
-
-qc_min_info <- function(clima_data){
+qc_min_info <- function(clima_data = ws_data, nyear = 5){
   clima_ts <- xts(x = clima_data, order.by = as.Date(row.names(clima_data)))
   clima_mts <- as.data.frame(apply.monthly(clima_ts,FUN=apply,MARGIN=2, mean_cn, n=20))
   clima_yts <- as.data.frame(apply.yearly(clima_mts,FUN=apply,MARGIN=2, mean_n, n=0))
   clima_yts[clima_yts < 1000] <- 1
   
   clima_yts_rs <- data.frame(SYT = colSums(clima_yts, na.rm = T))
-  clima_yts_rs[clima_yts_rs<5] <- 0
-  clima_yts_rs[clima_yts_rs>0] <- 1
+  clima_yts_rs[clima_yts_rs < nyear] <- 0
+  clima_yts_rs[clima_yts_rs > 0] <- 1
   return(clima_yts_rs)
 }
 

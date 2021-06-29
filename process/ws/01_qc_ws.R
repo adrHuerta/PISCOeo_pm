@@ -1,3 +1,7 @@
+# ws_data_cws:  Wind speed data from conventional weather station
+# qc:           quality control
+# ws_xyz_cws:   Wind speed location from conventional weather station
+
 library(tidyverse)
 library(xts)
 library(raster)
@@ -11,7 +15,7 @@ source('src/qc_spatial_neighbors.R')
 
 # qc1: coding errors
 ws_data <- read.csv('data/raw/ws_data_cws.csv', row.names = 1)
-ws_qc1 <- qc1_func(ws_data, ws_data, 15)
+ws_qc1 <- qc1_func(ws_data, 15)
 
 # qc2: maximum thresholds and physical limits
 ws_data <- read.csv('data/raw/ws_data_cws.csv', row.names = 1)
@@ -20,7 +24,7 @@ ws_qc2 <- qc2_func(ws_data)
 
 # qc3: percentile thresholds
 ws_data <- read.csv('data/raw/ws_data_cws.csv', row.names = 1)
-ws_qc3 <- (qc3_func_1(ws_data, 4.5))[,1:434]
+ws_qc3 <- (qc3_func_1(ws_data, 4.5))[,1:ncol(ws_data)]
 
 # qc4: neighbors compare
 ws_data <- read.csv('data/raw/ws_data_cws.csv', row.names = 1)
@@ -43,11 +47,11 @@ graph_hmg(ws_qca,'data/raw/graphics/ws_hmg/', 'ws')
 # delete year with errors
 ws_qcv <- delet_year(ws_qca, ws_visual_qc(ws_qca))
 
-# minimum 5 years with 365 days
-ws_qcmd <- qc_3y365(ws_qcv)
+# minimum n years with 365 days
+ws_qcmd <- qc_ny365(clima_data = ws_qcv, nyear = 3)
 
-# minimum information 20D / 12M (FLAG) #"1" 5y7 / "0" 5 
-ws_qcma <- qc_min_info(ws_qcmd)
+# minimum information 20D & 12M & n year (FLAG):"1" nyear |"0" 
+ws_qcma <- qc_min_info(clima_data = ws_qcmd, nyear = 5)
 
 # ws with qc in list: data & xyz
 ws_xyz <- data.frame(ws_xyz, QC = ws_qcma$SYT)
@@ -56,7 +60,7 @@ ws_xyz_qcf <- sel_xyz_wqc(ws_qcmd, ws_xyz)
 row.names(ws_xyz_qcf) <- NULL
 
 ws_data_xts <- xts(ws_data_qcf, order.by = as.Date(row.names(ws_data_qcf)))
-ws_climatology <- data.frame(round(t(hydroTSM::monthlyfunction(ws_data_xts, FUN=mean)), 2))
+ws_climatology <- data.frame(t(hydroTSM::monthlyfunction(ws_data_xts, FUN=mean)))
 
 ws_wqc <- list(values=ws_data_xts, climat = ws_climatology, xyz=ws_xyz_qcf)
 

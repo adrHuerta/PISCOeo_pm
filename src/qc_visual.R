@@ -401,4 +401,51 @@ ws_visual_qc <- function(clima_data){
   return(clima_dlt)
 }
 
+sd_visual_qc <- function(clima_data){
+  clima_dlt <- do.call("rbind",replicate(39,data.frame(t(matrix(1:ncol(clima_data),ncol=1))),simplify=FALSE))
+  clima_dlt[clima_dlt < 1000] <- 1
+  lista_del <- list(data.frame(E002=c(1996)),
+                    data.frame(E013=c(2016:2018)),
+                    data.frame(E022=c(1986:1989)),
+                    data.frame(E029=c(2005:2018)),
+                    data.frame(E030=c(2009:2016)),
+                    data.frame(E039=c(2008:2012)),
+                    data.frame(E041=c(1991:1995,2006:2011)),
+                    data.frame(E043=c(1986:1990)),
+                    data.frame(E053=c(2009:2019)),
+                    data.frame(E057=c(1981:2011)),
+                    data.frame(E065=c(1990:2004)),
+                    data.frame(E076=c(1980:2001)),
+                    data.frame(E080=c(2004)),
+                    data.frame(E081=c(2008:2009)),
+                    data.frame(E128=c(1996:2019)),
+                    data.frame(E131=c(2008:2011)),
+                    data.frame(E132=c(1981:1993)),
+                    data.frame(E142=c(2007:2012)),
+                    data.frame(E153=c(2017:2019)),
+                    data.frame(E159=c(1981:1997)),
+                    data.frame(E163=c(1984:1989)),
+                    data.frame(E179=c(1984)),
+                    data.frame(E182=c(2014:2017)),
+                    data.frame(E241=c(1997:2002)),
+                    data.frame(E271=c(2007:2019)),
+                    data.frame(E275=c(1997:1998,2018)),
+                    data.frame(E289=c(2012:2019)),
+                    data.frame(E293=c(2000:2003)),
+                    data.frame(E294=c(2017)),
+                    data.frame(E330=c(2003:2009)))
+  
+  nest <- vector(mode = 'numeric')
+  for (ne in 1:length(lista_del)) {
+    tit <- as.numeric(substr(colnames(lista_del[[ne]]),2,4))
+    nest <- append(nest, tit)
+  }
+  
+  for (numb in 1:length(lista_del)) {
+    for (i in lista_del[[numb]][,1]) {
+      clima_dlt[as.numeric(i)-1980, nest[numb]] <- NA
+    }
+  }
+  return(clima_dlt)
+}
 

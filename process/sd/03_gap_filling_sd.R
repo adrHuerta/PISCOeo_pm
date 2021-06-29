@@ -16,7 +16,7 @@ sd_cws <- readRDS('data/processed/obs/sd/qc_sd_plus_era_data.RDS')
 sd_cws_data <- sd_cws$values
 sd_cws_xyz <- sd_cws$xyz
 
-# Especificar las estaciones que se van a completar: RAD OBS
+# Select stations to complete:
 sd_cws_xyz <- sd_cws_xyz[sd_cws_xyz$SRC=='OBS'&sd_cws_xyz$QC==1,]
 sd_cws_xyz_to_be_used_plusERA5 <- sd_cws_xyz # stations + ERA5
 qc_data_values_sd_ERA5_filled <- sd_cws_data

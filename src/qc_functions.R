@@ -5,16 +5,16 @@ yeardays <- function(time){
   return(as.POSIXlt(as.POSIXct(time))$yday + 1)
 }
 
-year2day <- function(clim_year){
-  fyears <- row.names(clim_year)
-  yrs <- as.data.frame(t(matrix(1:ncol(clim_year), ncol = 1)))
-  colnames(yrs) <- colnames(clim_year)
+
+year2day <- function(clim_year = dlt_station){
+  fyears <- index(clim_year)
+  yrs <- list()
   for (i in 1:length(fyears)) {
-    pc1 <- do.call("rbind", replicate(yeardays(fyears[i]), clim_year[i,], simplify = FALSE))
-    yrs <- rbind(yrs, pc1)
+    yrs[[i]] <- do.call("rbind",replicate(yeardays(fyears[i]), clim_year[i,], simplify = FALSE))
   }
-  yrs_f <- yrs[2:nrow(yrs),]
-  return(yrs_f)
+  yrs <- do.call("rbind", yrs)
+  index(yrs) <- seq(ymd(as.Date('1981-01-01')), ymd(as.Date('2019-12-31')), by='day')
+  return(yrs)
 }
 
 qc1_func <- function(val_clim, umbral){
@@ -142,6 +142,7 @@ qc4_func <- function(values = ws_data, xyz = ws_xyz, min_st = mins_ws, umb = 100
   est_wq4_abs[est_wq4_abs<umb] <- 0
   est_wq4_abs[est_wq4_abs>0] <- 1
   row.names(est_wq4_abs) <- row.names(values)
+  names(est_wq4_abs) <- names(values)
   return(est_wq4_abs)
 }
 
@@ -224,10 +225,10 @@ graph_hmg <- function(clim_data, path, tipdata){
   }
 }
 
-delet_year <- function(clima_data, dlt_station){
+delet_year <- function(clima_data = ws_qca, dlt_station = ws_visual_qc(ws_qca)){
   names(dlt_station) <- names(clima_data)
-  row.names(dlt_station) <- seq(ymd(as.Date('1981-01-01')), ymd(as.Date('2019-12-31')), by='year')
-  clima_dts <- year2day(dlt_station)
+  dlt_station <- xts(dlt_station, order.by = seq(ymd(as.Date('1981-01-01')), ymd(as.Date('2019-12-31')), by='year'))
+  clima_dts <- data.frame(year2day(dlt_station))
   clima_fmi <- clima_data*clima_dts
   return(clima_fmi)
 }

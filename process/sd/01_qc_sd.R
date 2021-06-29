@@ -42,7 +42,6 @@ sd_data <- read.csv('data/raw/obs/sd/sd_data_cws.csv', row.names = 1)
 sd_xyz  <- read.csv('data/raw/obs/sd/sd_xyz_cws.csv', stringsAsFactors = F)
 mins_sd <- min_stt(sd_xyz)
 sd_qc4  <- qc4_func(values = sd_data, xyz = sd_xyz, min_st = mins_sd, 80)
-names(sd_qc4) <- names(sd_data)
 
 # grouped automatic qc
 sd_data <- read.csv('data/raw/obs/sd/sd_data_cws.csv', row.names = 1)

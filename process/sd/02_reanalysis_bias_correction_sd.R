@@ -71,7 +71,7 @@ sd_data_xts <- xts(sd_data, order.by = index(sd_list$values))
 
 sd_erarc <- COMPAR_REO(as.data.frame(sd_eracc_list$values), 
                          as.data.frame(sd_data_xts), 0.55)
-sd_erarc_xts <- xts(sd_erarc, order.by = as.Date(row.names(sd_era_rvs)))
+sd_erarc_xts <- xts(sd_erarc, order.by = as.Date(row.names(sd_erarc)))
 sd_erarc_list <- list(values=sd_erarc_xts, xyz=sd_eracc_list$xyz)
 
 # E6: complete with daily climatologies
@@ -88,7 +88,7 @@ sd_eracc[sapply(sd_eracc, is.nan)] <- NA
 names(sd_eracc) <- names(sd_erarc_xts)
 
 sd_eracc_xts <- xts(sd_eracc, order.by = index(sd_erarc_xts))
-sd_eracc_list <- list(values=sd_era_CC_xts, xyz=sd_erarc_list$xyz)
+sd_eracc_list <- list(values=sd_eracc_xts, xyz=sd_erarc_list$xyz)
 
 # E7: merge obs + ERA5c
 sd_era_cd <- as.data.frame(sd_eracc_list$values)

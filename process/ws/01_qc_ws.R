@@ -32,7 +32,6 @@ ws_data <- read.csv('data/raw/obs/ws/ws_data_cws.csv', row.names = 1)
 ws_xyz <- read.csv('data/raw/obs/ws/ws_xyz_cws.csv', stringsAsFactors = F)
 mins_ws <- min_stt(ws_xyz)
 ws_qc4 <- qc4_func(values = ws_data, xyz = ws_xyz, min_st = mins_ws, 100)
-names(ws_qc4) <- names(ws_data)
 
 # grouped automatic qc
 ws_data <- read.csv('data/raw/obs/ws/ws_data_cws.csv', row.names = 1)

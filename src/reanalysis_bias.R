@@ -19,6 +19,27 @@ conv_rs_hs <- function(UBIC_EHS, RADS_ERA){
   return(HSOL_ERA)
 }
 
+conv_hs_rs <- function(UBIC_EHS, HSOL_DATA){
+  RAD_DATA <- HSOL_DATA
+  for (e in 1:nrow(UBIC_EHS)) {
+    lat <- UBIC_EHS[e,3]
+    rad_est <- HSOL_DATA[,e]
+    diaj <- yday(as.Date(rownames(HSOL_DATA)))
+    latr <- pi/180*lat #latitud en radianes
+    drts <- 1+0.033*cos(2*pi/365*diaj) #distancia relativa inversa Tierra-Sol
+    decs <- 0.409*sin((2*pi*(diaj/365))-1.39) #declinacion solar
+    arad <- acos(-tan(latr)*tan(decs)) #angulo de rad a la hora puesta del sol
+    ang1 <- sin(latr)*sin(decs)
+    ang2 <- cos(latr)*cos(decs)
+    N <- 24/pi*arad
+    RADX <- (24*60/pi)*(0.082*drts)*(arad*(ang1)+(ang2)*sin(arad))
+    
+    RADS <- round(((0.25+0.5*(rad_est/N))*RADX),2)
+    RAD_DATA[,e] <- RADS
+  }
+  return(RAD_DATA)
+}
+
 insel_na_1 <- function(HSOL){
   metad <- data.frame()
   for (i in 1:ncol(HSOL)) {
@@ -43,4 +64,11 @@ insel_na_2 <- function(RADS_ERA_CD, UBIC_RADS_OB){
   metad$ESTAC <- names(RADS_ERA_CD)
   HSOL_F <- UBIC_RADS_OB[!is.na(metad$NST), ]
   return(HSOL_F)
+}
+
+insel_na_3 <- function(RADS_ERA_CD){
+  RADS_ERA_t <- as.data.frame(t(as.matrix(RADS_ERA_CD)))
+  RADS_ERA_na <- na.omit(RADS_ERA_t)
+  RADS_ERA_t2 <- as.data.frame(t(as.matrix(RADS_ERA_na)))
+  return(RADS_ERA_t2)
 }

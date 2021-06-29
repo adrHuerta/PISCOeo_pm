@@ -11,8 +11,8 @@ source('src/from_PISCOt/GapFilling/GF_daily_climatology_filling.R')
 source('src/reanalysis_bias.R')
 
 # E1: import data reanalysis NetCDF
-rs_era5 <- raster::stack('data/raw/ERA5land_rs_1981_2019.nc')
-sd_list <- readRDS('data/processed/sd_wqc.RDS')
+rs_era5 <- raster::stack('data/processed/gridded/co_variables/ERA5land_rs_1981_2019.nc')
+sd_list <- readRDS('data/processed/obs/sd/qc_sd_obs.RDS')
 sd_xyz  <- sd_list$xyz
 sd_xyz  <- sd_xyz[sd_xyz$QC==1,]
 row.names(sd_xyz) <- NULL
@@ -33,7 +33,7 @@ sd_eram <- list(values=sd_era_xts, xyz=rs_era$xyz)
 # E3: apply correction
 sd_eram_xts <- sd_eram$values
 sd_eram_id <- sd_eram$xyz$ID
-sd_list <- readRDS('data/processed/sd_wqc.RDS')
+sd_list <- readRDS('data/processed/obs/sd/qc_sd_obs.RDS')
 sd_data_df <-  as.data.frame(sd_list$values)
 sd_data_df <- sd_data_df[,sd_eram_id]
 sd_data_xts <- xts(sd_data_df, order.by = index(sd_list$values))
@@ -61,7 +61,7 @@ sd_eracc_xts <- xts(sd_erac_c, order.by = as.Date(row.names(sd_erac_c)))
 sd_eracc_list <- list(values=sd_eracc_xts, xyz=sd_erac_list$xyz)
 
 # E5: keep if r >= 0.6 (ERA5 vs obs)
-sd_list <- readRDS('data/processed/sd_wqc.RDS')
+sd_list <- readRDS('data/processed/obs/sd/qc_sd_obs.RDS')
 
 sd_era_xts <- sd_eracc_list$values
 sd_era_id <- sd_eracc_list$xyz$ID
@@ -92,7 +92,7 @@ sd_eracc_list <- list(values=sd_era_CC_xts, xyz=sd_erarc_list$xyz)
 
 # E7: merge obs + ERA5c
 sd_era_cd <- as.data.frame(sd_eracc_list$values)
-sd_data_df <- as.data.frame(readRDS('data/processed/sd_wqc.RDS')$values)
+sd_data_df <- as.data.frame(readRDS('data/processed/obs/sd/qc_sd_obs.RDS')$values)
 
 names(sd_era_cd) <- paste0('ERA5_',names(sd_era_cd))
 sd_era_cds <- insel_na_1(sd_era_cd)
@@ -101,7 +101,7 @@ sd_db <- cbind(sd_data_df, sd_era_cds)
 sd_db <- xts(sd_db, order.by = as.Date(row.names(sd_data_df)))
 
 # E8: add metadata by ID
-sd_xyz <- readRDS('data/processed/sd_wqc.RDS')$xyz 
+sd_xyz <- readRDS('data/processed/obs/sd/qc_sd_obs.RDS')$xyz 
 
 sd_era_xyz <- insel_na_2(as.data.frame(sd_eracc_list$values), sd_eracc_list$xyz)
 sd_xyz$SRC <- 'OBS'
@@ -113,4 +113,4 @@ row.names(sd_xyz_db) <- NULL
 
 sd_db_xts <- xts(sd_db, order.by = index(sd_db))
 sd_db_list <- list(values=sd_db_xts, xyz = sd_xyz_db)
-saveRDS(sd_db_list, 'data/processed/sd_era_data.RDS')
+saveRDS(sd_db_list, 'data/processed/obs/sd/qc_sd_plus_era_data.RDS')

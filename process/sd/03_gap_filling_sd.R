@@ -12,7 +12,7 @@ source("src/from_PISCOt/GapFilling/GF_daily_climatology_filling.R")
 source('src/qc_spatial_neighbors.R')
 
 # read data and xyz from sd obs & sd ERA5
-sd_cws <- readRDS('data/processed/sd_era_data.RDS')
+sd_cws <- readRDS('data/processed/obs/sd/qc_sd_plus_era_data.RDS')
 sd_cws_data <- sd_cws$values
 sd_cws_xyz <- sd_cws$xyz
 
@@ -101,4 +101,4 @@ sd_ERA5_filled_sel_xts <- xts(sd_ERA5_filled_sel, order.by = index(sd_cws$values
 row.names(sd_xyz) <- NULL
 sd_cws_gf <- list(values = sd_ERA5_filled_sel_xts, xyz=sd_xyz)
 
-saveRDS(sd_cws_gf, 'DATA/PROCESSED/sd_cws_gf.RDS')
+saveRDS(sd_cws_gf, 'data/processed/obs/sd/qc_gf_sd_obs.RDS')

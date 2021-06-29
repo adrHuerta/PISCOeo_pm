@@ -1,6 +1,7 @@
 # ws_data_cws:  Wind speed data from conventional weather station
 # qc:           quality control
 # ws_xyz_cws:   Wind speed location from conventional weather station
+rm(list = ls())
 
 library(tidyverse)
 library(xts)
@@ -14,27 +15,27 @@ source('src/qc_visual.R')
 source('src/qc_spatial_neighbors.R')
 
 # qc1: coding errors
-ws_data <- read.csv('data/raw/ws_data_cws.csv', row.names = 1)
+ws_data <- read.csv('data/raw/obs/ws/ws_data_cws.csv', row.names = 1)
 ws_qc1 <- qc1_func(ws_data, 15)
 
 # qc2: maximum thresholds and physical limits
-ws_data <- read.csv('data/raw/ws_data_cws.csv', row.names = 1)
+ws_data <- read.csv('data/raw/obs/ws/ws_data_cws.csv', row.names = 1)
 ws_data[ws_data>40] <- 1000
 ws_qc2 <- qc2_func(ws_data)
 
 # qc3: percentile thresholds
-ws_data <- read.csv('data/raw/ws_data_cws.csv', row.names = 1)
+ws_data <- read.csv('data/raw/obs/ws/ws_data_cws.csv', row.names = 1)
 ws_qc3 <- (qc3_func_1(ws_data, 4.5))[,1:ncol(ws_data)]
 
 # qc4: neighbors compare
-ws_data <- read.csv('data/raw/ws_data_cws.csv', row.names = 1)
-ws_xyz <- read.csv('data/raw/ws_xyz_cws.csv', stringsAsFactors = F)
+ws_data <- read.csv('data/raw/obs/ws/ws_data_cws.csv', row.names = 1)
+ws_xyz <- read.csv('data/raw/obs/ws/ws_xyz_cws.csv', stringsAsFactors = F)
 mins_ws <- min_stt(ws_xyz)
 ws_qc4 <- qc4_func(values = ws_data, xyz = ws_xyz, min_st = mins_ws, 100)
 names(ws_qc4) <- names(ws_data)
 
 # grouped automatic qc
-ws_data <- read.csv('data/raw/ws_data_cws.csv', row.names = 1)
+ws_data <- read.csv('data/raw/obs/ws/ws_data_cws.csv', row.names = 1)
 ws_qcg <- ws_qc1+ws_qc2+ws_qc3+ws_qc4
 ws_qcg[ws_qcg == 0] <- -1
 ws_qcg[ws_qcg > 0] <- NA
@@ -42,9 +43,10 @@ ws_qcg[ws_qcg == -1] <- 1
 ws_qca <- ws_data*ws_qcg
 
 # qc5: visual control
-graph_hmg(ws_qca,'data/raw/graphics/ws_hmg/', 'ws')
+graph_hmg(ws_qca,'data/raw/obs/ws/ws_hmg/', 'ws')
 
 # delete year with errors
+# stations that should be deleted: c("X117043", "X116060", "X116011")
 ws_qcv <- delet_year(ws_qca, ws_visual_qc(ws_qca))
 
 # minimum n years with 365 days
@@ -62,6 +64,5 @@ row.names(ws_xyz_qcf) <- NULL
 ws_data_xts <- xts(ws_data_qcf, order.by = as.Date(row.names(ws_data_qcf)))
 ws_climatology <- data.frame(t(hydroTSM::monthlyfunction(ws_data_xts, FUN=mean)))
 
-ws_wqc <- list(values=ws_data_xts, climat = ws_climatology, xyz=ws_xyz_qcf)
-
-saveRDS(ws_wqc, 'data/processed/ws_wqc.RDS')
+ws_wqc <- list(values = ws_data_xts, xyz = ws_xyz_qcf)
+saveRDS(ws_wqc, 'data/processed/obs/ws/qc_ws_obs.RDS')

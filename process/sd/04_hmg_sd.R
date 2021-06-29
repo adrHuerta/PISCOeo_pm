@@ -12,7 +12,7 @@ source('src/from_PISCOt/Homogenization/HG_simple_snht.R')
 source('src/from_PISCOt/Homogenization/HG_hmgFactor2daily.R')
 
 # E1: import data
-sd_gf   <- readRDS("data/processed/sd_cws_gf.RDS")
+sd_gf   <- readRDS("data/processed/obs/sd/qc_gf_sd_obs.RDS")
 sd_gf_data <- sd_gf$values
 
 # E2: daily to monthly
@@ -75,4 +75,4 @@ qc_daily_values_sd_ERA5_hmg[qc_daily_values_sd_ERA5_hmg<0] <- 0
 
 sd_hmg <- list(values = xts(qc_daily_values_sd_ERA5_hmg, order.by = index(sd_gf$values)), 
                xyz=sd_gf$xyz)
-saveRDS(sd_hmg, 'data/processed/sd_hmg.RDS')
+saveRDS(sd_hmg, 'data/processed/obs/sd/qc_gf_hmg_sd_obs.RDS')

@@ -78,8 +78,8 @@ OK_interpolation <- function(obs_point_data,
   
   # getting residuals
   temp_model_ag <- raster::aggregate(model_grid_data, resFitting)
-  residual_sp <- extract(temp_model_ag,
-                         obs_point_data, cellnumber = FALSE, sp = TRUE)
+  residual_sp <- raster::extract(temp_model_ag,
+                                 obs_point_data, cellnumber = FALSE, sp = TRUE)
   residual_sp$residual <- residual_sp$OBS - residual_sp$MODEL
   
   # variogram autofit

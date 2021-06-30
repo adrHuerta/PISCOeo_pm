@@ -38,7 +38,7 @@ build_neigh_matrix <- function(id_stations,
     } else {
       
       # how is the correlation?
-      rcor_neigh = round(cor(matrix_data[, c(id_stations[1], n_station)], use = "pairwise.complete.obs")[2], 1)
+      rcor_neigh = round(cor(matrix_data[, c(id_stations[1], n_station)], use = "pairwise.complete.obs")[2], 2)
     
       if(rcor_neigh < param_neigh$r_cor){
         

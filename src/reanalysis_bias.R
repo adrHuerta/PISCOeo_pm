@@ -72,3 +72,23 @@ insel_na_3 <- function(RADS_ERA_CD){
   RADS_ERA_t2 <- as.data.frame(t(as.matrix(RADS_ERA_na)))
   return(RADS_ERA_t2)
 }
+
+compar_cc <- function(clima_era, clima_obs, r){
+  clima_era_c <- clima_era
+  cc_n <- data.frame()
+  for (i in 1:ncol(clima_era)) {
+    vect_ob <- cor(clima_era[,i], clima_obs[,i], use="pairwise.complete.obs")
+    cc_n <- rbind(cc_n, vect_ob)
+  }
+  cc_n <- round(cc_n,2)
+  names(cc_n) <- 'R_EO'
+  cc_n[cc_n>=r] <- 1
+  cc_n[cc_n<1] <- NA
+  
+  for (i in 1:nrow(cc_n)) {
+    if(is.na((cc_n[,1])[i])){
+      clima_era_c[,i] <- NA
+    }
+  }
+  return(clima_era_c)
+}

@@ -1,3 +1,5 @@
+rm(list = ls())
+
 library(lubridate)
 library(xts)
 
@@ -33,30 +35,32 @@ param_spt <- list(list(lmt_dist = 1000,
 # E4: monthly homogenization 
 for(xi in seq_along(param_spt)){
   
-  sd_to_be_hmg <- list()
-  
-  for (station_j in seq_along(sd_gf$xyz$ID)){
-    ID_stat_s  <- spt_neighrs(id_station = sd_gf$xyz$ID[station_j],
-                              stations_database = sd_gf$xyz,
-                              lmt_dist = param_spt[[xi]]$lmt_dist,
-                              lmt_elv = param_spt[[xi]]$lmt_elv,
-                              lmt_n = param_spt[[xi]]$lmt_n)
-    build_matrix(id_stations = ID_stat_s,
-                 time_series_database = qc_monthly_values_sd_ERA5_hmg,
-                 neigh_r = .55) -> ID_stat_s
-    
-    if(ncol(ID_stat_s) >= 4){
-      
-      response <- pha_hmg(ts_data = ID_stat_s)$hmg
-      
-    } else {
-      
-      response <- snht_hmg(ts_data = ID_stat_s[, 1])$hmg
-      
-    }
-    
-    sd_to_be_hmg[[station_j]] <- response
-  }
+  sd_to_be_hmg <- parallel::mclapply(seq_along(sd_gf$xyz$ID),
+                                     function(station_j){
+                                       
+                                       ID_stat_s  <- spt_neighrs(id_station = sd_gf$xyz$ID[station_j],
+                                                                 stations_database = sd_gf$xyz,
+                                                                 lmt_dist = param_spt[[xi]]$lmt_dist,
+                                                                 lmt_elv = param_spt[[xi]]$lmt_elv,
+                                                                 lmt_n = param_spt[[xi]]$lmt_n)
+                                       
+                                       build_matrix(id_stations = ID_stat_s,
+                                                    time_series_database = qc_monthly_values_sd_ERA5_hmg,
+                                                    param_neigh = list(r_cor = .55, n_daily_cycle = 5)) -> ID_stat_s
+                                       
+                                       if(ncol(ID_stat_s) >= 4){
+                                         
+                                         response <- pha_hmg(ts_data = ID_stat_s)$hmg
+                                         
+                                       } else {
+                                         
+                                         response <- snht_hmg(ts_data = ID_stat_s[, 1])$hmg
+                                         
+                                       }
+                                       
+                                       response
+                                     },
+                                     mc.cores = 5)
   
   qc_monthly_values_sd_ERA5_hmg <- do.call("cbind", sd_to_be_hmg)
   colnames(qc_monthly_values_sd_ERA5_hmg) <- sd_gf$xyz$ID
@@ -67,8 +71,9 @@ qc_daily_values_sd_ERA5_hmg <- sd_gf_data
 
 for(station_j in sd_gf$xyz$ID){
   qc_daily_values_sd_ERA5_hmg[, station_j] <- hmgFactor2daily(monthly_ts = month_sd[, station_j],
-                                                                monthly_ts_hmg = qc_monthly_values_sd_ERA5_hmg[, station_j],
-                                                                daily_ts = sd_gf_data[, station_j])
+                                                              monthly_ts_hmg = qc_monthly_values_sd_ERA5_hmg[, station_j],
+                                                              daily_ts = sd_gf_data[, station_j],
+                                                              mode_hmg = "*")
 }
 
 qc_daily_values_sd_ERA5_hmg[qc_daily_values_sd_ERA5_hmg<0] <- 0

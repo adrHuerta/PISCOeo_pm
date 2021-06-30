@@ -1,3 +1,5 @@
+rm(list = ls())
+
 library(raster)
 library(ncdf4)
 library(lubridate)
@@ -11,13 +13,14 @@ source('src/from_PISCOt/GapFilling/GF_daily_climatology_filling.R')
 source('src/reanalysis_bias.R')
 
 # E1: import data reanalysis NetCDF
-td_era5 <- raster::stack('data/processed/gridded/co_variables/ERA5land_td_1981_2019.nc')
+td_era5 <- raster::brick('data/processed/gridded/co_variables/ERA5land_td_1981_2019.nc') + 0
 td_list <- readRDS('data/processed/obs/td/qc_td_obs.RDS')
 td_xyz  <- td_list$xyz
 td_xyz  <- td_xyz[td_xyz$QC==1,]
 row.names(td_xyz) <- NULL
 
-td_era <- as.data.frame(t(raster::extract(td_era5, td_xyz[,2:3], method='simple')))
+points_xy <- raster::extract(td_era5[[1]], td_xyz[,2:3], method = 'simple', cellnumbers = TRUE)[,1]
+td_era <- as.data.frame(t(td_era5[points_xy]))
 names(td_era) <- td_xyz$ID
 
 td_era_xts <- xts(td_era, order.by = index(td_list$values))
@@ -31,13 +34,15 @@ td_list_df <-  as.data.frame(td_list$values)
 td_list_df <- td_list_df[,td_era_id]
 td_data_xts <- xts(td_list_df, order.by = index(td_list$values))
 
-td_erac <- as.data.frame((matrix(1:nrow(td_era_xts), ncol = 1)))
+td_erac <- parallel::mclapply(1:ncol(td_data_xts),
+                              function(i){
+                                
+                                daily_varying_anom_qmap(ts_obs = td_data_xts[,i], 
+                                                        ts_model = td_era_xts[,i])
+                                
+                              }, mc.cores = 3)
 
-for (i in 1:ncol(td_data_xts)) {
-  era5_c <- daily_varying_anom_qmap(ts_obs = td_data_xts[,i], ts_model = td_era_xts[,i])
-  td_erac[,i] <- era5_c
-}
-
+td_erac <- do.call("cbind", td_erac)
 names(td_erac) <- names(td_data_xts)
 
 td_erac_xts <- xts(td_erac, order.by = index(td_data_xts))
@@ -62,8 +67,8 @@ td_data <-  as.data.frame(td_list$values)
 td_data <- td_data[,td_era_id]
 td_data_xts <- xts(td_data, order.by = index(td_list$values))
 
-td_erarc <- COMPAR_REO(as.data.frame(td_eracc_list$values), 
-                         as.data.frame(td_data_xts), 0.55)
+td_erarc <- compar_cc(as.data.frame(td_eracc_list$values),
+                      as.data.frame(td_data_xts), 0.55)
 td_erarc_xts <- xts(td_erarc, order.by = as.Date(row.names(td_erarc)))
 td_erarc_list <- list(values=td_erarc_xts, xyz=td_eracc_list$xyz)
 
@@ -94,7 +99,7 @@ td_db <- cbind(td_data_df, td_era_cds)
 td_db <- xts(td_db, order.by = as.Date(row.names(td_data_df)))
 
 # E7: add metadata by ID
-td_xyz <- readRDS('data/processed/obs/sd/qc_sd_obs.RDS')$xyz 
+td_xyz <- readRDS('data/processed/obs/td/qc_td_obs.RDS')$xyz 
 
 td_era_xyz <- insel_na_2(as.data.frame(td_eracc_list$values), td_eracc_list$xyz)
 td_xyz$SRC <- 'OBS'

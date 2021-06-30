@@ -52,7 +52,7 @@ sd_qcg[sd_qcg == -1] <- 1
 sd_qca <- sd_data*sd_qcg
 
 # qc5: visual control
-graph_hmg(sd_qca,'data/raw/obs/sd/sd_hmg/', 'sd')
+# graph_hmg(sd_qca,'data/raw/obs/sd/sd_hmg/', 'sd')
 
 # delete year with errors
 sd_qcv <- delet_year(sd_qca, sd_visual_qc(sd_qca))
@@ -70,8 +70,6 @@ sd_xyz_qcf <- sel_xyz_wqc(sd_qcmd, sd_xyz)
 row.names(sd_xyz_qcf) <- NULL
 
 sd_data_xts <- xts(sd_data_qcf, order.by = as.Date(row.names(sd_data_qcf)))
-sd_climatology <- data.frame(t(hydroTSM::monthlyfunction(sd_data_xts, FUN=mean)))
 
-sd_wqc <- list(values=sd_data_xts, xyz=sd_xyz_qcf, climat = sd_climatology)
-
+sd_wqc <- list(values=sd_data_xts, xyz=sd_xyz_qcf)
 saveRDS(sd_wqc, 'data/processed/obs/sd/qc_sd_obs.RDS')

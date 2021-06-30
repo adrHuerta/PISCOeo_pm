@@ -1,3 +1,5 @@
+rm(list = ls())
+
 library(lubridate)
 library(xts)
 library(magrittr)
@@ -17,8 +19,8 @@ td_cws_data <- td_cws$values
 td_cws_xyz <- td_cws$xyz
 
 # Select stations to complete:
-td_cws_xyz <- td_cws_xyz[td_cws_xyz$SRC=='OBS'&td_cws_xyz$QC==1,]
 td_cws_xyz_to_be_used_plusERA5 <- td_cws_xyz # stations + ERA5
+td_cws_xyz <- td_cws_xyz[td_cws_xyz$SRC == 'OBS' & td_cws_xyz$QC == 1,] # stations
 qc_data_values_td_ERA5_filled <- td_cws_data
 
 # Search neighbor stations to complete by parameters:
@@ -40,21 +42,24 @@ param_spt <- list(list(lmt_dist = 70,
 # (only in stations where there are at least 1% (or less) of NAs)
 for(xi in seq_along(param_spt)){
   
-  td_era_to_be_fill <- list()
+  td_era_to_be_fill <- parallel::mclapply(seq_along(td_cws_xyz$ID),
+                                          function(station_j){
+                                            
+                                            spt_neighrs(id_station = td_cws_xyz$ID[station_j],
+                                                         stations_database = td_cws_xyz_to_be_used_plusERA5,
+                                                         lmt_dist = param_spt[[xi]]$lmt_dist,
+                                                         lmt_elv = param_spt[[xi]]$lmt_elv,
+                                                         lmt_n = param_spt[[xi]]$lmt_n) -> step1
+                                            
+                                            build_matrix(id_stations = step1,
+                                                         time_series_database = qc_data_values_td_ERA5_filled,
+                                                         param_neigh = list(r_cor = .6, n_daily_cycle = 5)) -> step2
+                                            
+                                            std_dep_imputation(stat_data = step2) -> step3
+                                            step3$filled
+                                             
+                                           }, mc.cores = 5)
   
-  for(station_j in seq_along(td_cws_xyz$ID)){
-    spt_neighrs(id_station = td_cws_xyz$ID[station_j],
-                stations_database = td_cws_xyz_to_be_used_plusERA5,
-                lmt_dist = param_spt[[xi]]$lmt_dist,
-                lmt_elv = param_spt[[xi]]$lmt_elv,
-                lmt_n = param_spt[[xi]]$lmt_n) -> step1
-    build_matrix(id_stations = step1,
-                 time_series_database = qc_data_values_td_ERA5_filled,
-                 neigh_r = .55) -> step2
-    std_dep_imputation(stat_data = step2) -> step3
-    
-    td_era_to_be_fill[[station_j]] <- step3$filled
-  }
   do.call("cbind", td_era_to_be_fill) -> td_ERA5_to_be_filled
   setNames(td_ERA5_to_be_filled, td_cws_xyz$ID) -> td_ERA5_to_be_filled
   
@@ -62,7 +67,6 @@ for(xi in seq_along(param_spt)){
 }
 
 qc_data_td_ERA5_filled <- qc_data_values_td_ERA5_filled[, td_cws_xyz$ID]
-qc_data_td_ERA5_filled[qc_data_td_ERA5_filled<0] <- 0
 
 qc_data_td_ERA5_filled_xts <- xts(qc_data_td_ERA5_filled, order.by = index(td_cws_data))
 qc_data_td_ERA5_filled_rds <- list(values=qc_data_td_ERA5_filled_xts, xyz = td_cws$xyz)

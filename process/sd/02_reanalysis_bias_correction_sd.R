@@ -1,3 +1,5 @@
+rm(list = ls())
+
 library(raster)
 library(ncdf4)
 library(lubridate)
@@ -11,13 +13,14 @@ source('src/from_PISCOt/GapFilling/GF_daily_climatology_filling.R')
 source('src/reanalysis_bias.R')
 
 # E1: import data reanalysis NetCDF
-rs_era5 <- raster::stack('data/processed/gridded/co_variables/ERA5land_rs_1981_2019.nc')
+rs_era5 <- raster::brick('data/processed/gridded/co_variables/ERA5land_rs_1981_2019.nc') + 0
 sd_list <- readRDS('data/processed/obs/sd/qc_sd_obs.RDS')
 sd_xyz  <- sd_list$xyz
 sd_xyz  <- sd_xyz[sd_xyz$QC==1,]
 row.names(sd_xyz) <- NULL
 
-rs_era <- as.data.frame(t(raster::extract(rs_era5, sd_xyz[,2:3], method='simple')))
+points_xy <- raster::extract(rs_era5[[1]], sd_xyz[,2:3], method = 'simple', cellnumbers = TRUE)[,1]
+rs_era <- as.data.frame(t(rs_era5[points_xy]))
 names(rs_era) <- sd_xyz$ID
 
 rs_era_xts <- xts(rs_era, order.by = index(sd_list$values))
@@ -28,27 +31,29 @@ sd_era <- conv_rs_hs(rs_era$xyz, as.data.frame(rs_era$values))
 sd_era[sd_era<0] <- 0
 sd_era_xts <- xts(sd_era, order.by = index(rs_era$values))
 names(sd_era_xts) <- paste0('ERA5_',names(rs_era$values))
-sd_eram <- list(values=sd_era_xts, xyz=rs_era$xyz)
+sd_era <- list(values=sd_era_xts, xyz=rs_era$xyz)
 
 # E3: apply correction
-sd_eram_xts <- sd_eram$values
-sd_eram_id <- sd_eram$xyz$ID
+sd_era_xts <- sd_era$values
+sd_era_id <- sd_era$xyz$ID
 sd_list <- readRDS('data/processed/obs/sd/qc_sd_obs.RDS')
 sd_data_df <-  as.data.frame(sd_list$values)
-sd_data_df <- sd_data_df[,sd_eram_id]
+sd_data_df <- sd_data_df[,sd_era_id]
 sd_data_xts <- xts(sd_data_df, order.by = index(sd_list$values))
 
-sd_erac <- as.data.frame((matrix(1:nrow(sd_eram_xts), ncol = 1)))
+sd_erac <- parallel::mclapply(1:ncol(sd_data_xts),
+                              function(i){
+                                
+                                daily_varying_anom_qmap(ts_obs = sd_data_xts[,i], 
+                                                        ts_model = sd_era_xts[,i])
+                                
+                              }, mc.cores = 3)
 
-for (i in 1:ncol(sd_data_xts)) {
-  era5_c <- daily_varying_anom_qmap(ts_obs = sd_data_xts[,i], ts_model = sd_eram_xts[,i])
-  sd_erac[,i] <- era5_c
-}
-
+sd_erac <- do.call("cbind", sd_erac)
 names(sd_erac) <- names(sd_data_xts)
 
 sd_erac_xts <- xts(sd_erac, order.by = index(sd_data_xts))
-sd_erac_list <- list(values=sd_erac_xts, xyz=sd_eram$xyz)
+sd_erac_list <- list(values=sd_erac_xts, xyz=sd_era$xyz)
 
 # E4: ERA5 series extreme data control
 sd_erac <- as.data.frame(sd_erac_list$values)
@@ -69,8 +74,8 @@ sd_data <-  as.data.frame(sd_list$values)
 sd_data <- sd_data[,sd_era_id]
 sd_data_xts <- xts(sd_data, order.by = index(sd_list$values))
 
-sd_erarc <- COMPAR_REO(as.data.frame(sd_eracc_list$values), 
-                         as.data.frame(sd_data_xts), 0.55)
+sd_erarc <- compar_cc(as.data.frame(sd_eracc_list$values),
+                      as.data.frame(sd_data_xts), 0.55)
 sd_erarc_xts <- xts(sd_erarc, order.by = as.Date(row.names(sd_erarc)))
 sd_erarc_list <- list(values=sd_erarc_xts, xyz=sd_eracc_list$xyz)
 

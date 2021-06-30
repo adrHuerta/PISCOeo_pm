@@ -1,6 +1,7 @@
 # td_data_cws:  Sunshine duration data from conventional weather station
 # qc:           quality control
 # td_xyz_cws:   Sunshine duration location from conventional weather station
+rm(list = ls())
 
 library(tidyverse)
 library(xts)
@@ -41,7 +42,7 @@ td_qcg[td_qcg == -1]  <- 1
 td_qca <- td_data*td_qcg
 
 # qc5: visual control
-graph_hmg(td_qca,'data/raw/obs/td/td_hmg/', 'td')
+# graph_hmg(td_qca,'data/raw/obs/td/td_hmg/', 'td')
 
 # delete year with errors
 td_qcv <- delet_year(td_qca, td_visual_qc(td_qca))
@@ -59,8 +60,7 @@ td_xyz_qcf  <- sel_xyz_wqc(td_qcmd, td_xyz)
 row.names(td_xyz_qcf) <- NULL
 
 td_data_xts <- xts(td_data_qcf, order.by = as.Date(row.names(td_data_qcf)))
-td_climatology <- data.frame(t(hydroTSM::monthlyfunction(td_data_xts, FUN=mean)))
 
-td_wqc <- list(values=td_data_xts, xyz=td_xyz_qcf, climat = td_climatology)
+td_wqc <- list(values=td_data_xts, xyz=td_xyz_qcf)
 
 saveRDS(td_wqc, 'data/processed/obs/td/qc_td_obs.RDS')

@@ -47,7 +47,7 @@ sd_erac <- parallel::mclapply(1:ncol(sd_data_xts),
                                 daily_varying_anom_qmap(ts_obs = sd_data_xts[,i], 
                                                         ts_model = sd_era_xts[,i])
                                 
-                              }, mc.cores = 3)
+                              }, mc.cores = 5)
 
 sd_erac <- do.call("cbind", sd_erac)
 names(sd_erac) <- names(sd_data_xts)

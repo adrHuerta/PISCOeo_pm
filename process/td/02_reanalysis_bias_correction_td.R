@@ -40,7 +40,7 @@ td_erac <- parallel::mclapply(1:ncol(td_data_xts),
                                 daily_varying_anom_qmap(ts_obs = td_data_xts[,i], 
                                                         ts_model = td_era_xts[,i])
                                 
-                              }, mc.cores = 3)
+                              }, mc.cores = 5)
 
 td_erac <- do.call("cbind", td_erac)
 names(td_erac) <- names(td_data_xts)

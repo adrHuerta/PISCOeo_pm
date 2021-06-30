@@ -46,7 +46,7 @@ for(xi in seq_along(param_spt)){
                                        
                                        build_matrix(id_stations = ID_stat_s,
                                                     time_series_database = qc_monthly_values_sd_ERA5_hmg,
-                                                    param_neigh = list(r_cor = .55, n_daily_cycle = 5)) -> ID_stat_s
+                                                    param_neigh = list(r_cor = .6, n_daily_cycle = 5)) -> ID_stat_s
                                        
                                        if(ncol(ID_stat_s) >= 4){
                                          
@@ -78,6 +78,12 @@ for(station_j in sd_gf$xyz$ID){
 
 qc_daily_values_sd_ERA5_hmg[qc_daily_values_sd_ERA5_hmg<0] <- 0
 
+# time series were the method did not worked very well (visual inspection)
+to_del <- c("X113029", "X110028", "X109017", "X100138", "X107013")
+qc_daily_values_sd_ERA5_hmg <- qc_daily_values_sd_ERA5_hmg[, -match(to_del, sd_gf$xyz$ID)]
+sd_gf$xyz <- sd_gf$xyz[-match(to_del, sd_gf$xyz$ID), ]
+rownames(sd_gf$xyz) <- NULL
+  
 sd_hmg <- list(values = xts(qc_daily_values_sd_ERA5_hmg, order.by = index(sd_gf$values)), 
-               xyz=sd_gf$xyz)
+               xyz = sd_gf$xyz)
 saveRDS(sd_hmg, 'data/processed/obs/sd/qc_gf_hmg_sd_obs.RDS')

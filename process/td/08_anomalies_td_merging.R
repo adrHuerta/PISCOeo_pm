@@ -51,4 +51,4 @@ parallel::mclapply(seq_along(time(qc_data$values$td)),
                                                               sprintf("%s/td_%s.nc", "td",  date_i)),
                                          datatype = 'FLT4S', force_v4 = TRUE, compression = 7)
                      
-                   }, mc.cores = 11)
+                   }, mc.cores = 10)

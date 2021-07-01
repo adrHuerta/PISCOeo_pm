@@ -60,7 +60,7 @@ for(xi in seq_along(param_spt)){
                                        
                                        response
                                      },
-                                     mc.cores = 5)
+                                     mc.cores = 10)
 
   qc_monthly_values_td_ERA5_hmg <- do.call("cbind", td_to_be_hmg)
   colnames(qc_monthly_values_td_ERA5_hmg) <- td_gf$xyz$ID

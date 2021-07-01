@@ -58,7 +58,7 @@ for(xi in seq_along(param_spt)){
                                             std_dep_imputation(stat_data = step2) -> step3
                                             step3$filled
                                              
-                                           }, mc.cores = 5)
+                                           }, mc.cores = 10)
   
   do.call("cbind", td_era_to_be_fill) -> td_ERA5_to_be_filled
   setNames(td_ERA5_to_be_filled, td_cws_xyz$ID) -> td_ERA5_to_be_filled

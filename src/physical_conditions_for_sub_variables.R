@@ -1,3 +1,6 @@
+# http://www.fao.org/3/x0490s/x0490s.pdf 
+# page 48, eq. 34
+
 maximum_lenght_sd <- function(jday_i, lat_i)
 {
   lat_i <- lat_i*pi/180

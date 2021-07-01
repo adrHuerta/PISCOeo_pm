@@ -1,9 +1,24 @@
 rm(list = ls())
 
+source('./src/checking_files.R')
+
+# checking files
+checking_files(var_grid = "tmax", time_range = c("1981-01-01", "2016-12-31"))
+checking_files(var_grid = "tmin", time_range = c("1981-01-01", "2016-12-31"))
+checking_files(var_grid = "td", time_range = c("1981-01-01", "2016-12-31"))
+checking_files(var_grid = "sd", time_range = c("1981-01-01", "2016-12-31"))
+
+# checking no NA files
+summary(get_pixel_ts_from_grids(var_grid = "tmax"))
+summary(get_pixel_ts_from_grids(var_grid = "tmin"))
+summary(get_pixel_ts_from_grids(var_grid = "td"))
+summary(get_pixel_ts_from_grids(var_grid = "sd"))
+
+# python code
 reticulate::use_virtualenv("/home/adrian/Documents/Repos/Evapotranspiration/venv", required = TRUE)
 reticulate::repl_python()
 
-# python packages
+# packages
 import urllib.request
 import pandas as pd
 import numpy as np

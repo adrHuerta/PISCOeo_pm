@@ -36,7 +36,7 @@ mask_for_Nmax <- CC[[1]]
 mask_for_Nmax[mask_for_Nmax > 0] <- 1
 
 
-parallel::mclapply(1:10, 
+parallel::mclapply(4001:13149, 
                    function(i){
                      
                      date_i <- time(qc_data$values$sd)[i]
@@ -62,4 +62,4 @@ parallel::mclapply(1:10,
                                                               sprintf("%s/sd_%s.nc", "sd",  date_i)),
                                          datatype = 'FLT4S', force_v4 = TRUE, compression = 7)
                      
-                   }, mc.cores = 5)
+                   }, mc.cores = 11)

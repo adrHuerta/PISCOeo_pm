@@ -35,8 +35,7 @@ sd_normals <- file.path("./data/processed/gridded/sub_variables/normals",
 mask_for_Nmax <- CC[[1]]
 mask_for_Nmax[mask_for_Nmax > 0] <- 1
 
-
-parallel::mclapply(4001:13149, 
+parallel::mclapply(seq_along(time(qc_data$values$sd)), 
                    function(i){
                      
                      date_i <- time(qc_data$values$sd)[i]

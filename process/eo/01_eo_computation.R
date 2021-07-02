@@ -9,13 +9,13 @@ checking_files(var_grid = "td", time_range = c("1981-01-01", "2016-12-31"))
 checking_files(var_grid = "sd", time_range = c("1981-01-01", "2016-12-31"))
 
 # checking no NA files
-summary(get_pixel_ts_from_grids(var_grid = "tmax"))
-summary(get_pixel_ts_from_grids(var_grid = "tmin"))
-summary(get_pixel_ts_from_grids(var_grid = "td"))
-summary(get_pixel_ts_from_grids(var_grid = "sd"))
+# summary(get_pixel_ts_from_grids(var_grid = "tmax", n_cores_ = 10))
+# summary(get_pixel_ts_from_grids(var_grid = "tmin", n_cores_ = 10))
+# summary(get_pixel_ts_from_grids(var_grid = "td", n_cores_ = 10))
+# summary(get_pixel_ts_from_grids(var_grid = "sd", n_cores_ = 10))
 
 # python code
-reticulate::use_virtualenv("/home/adrian/Documents/Repos/Evapotranspiration/venv", required = TRUE)
+reticulate::use_virtualenv("/home/waldo/Documentos/Repos/GRID_CLIM_nc_files/venv", required = TRUE)
 reticulate::repl_python()
 
 # packages
@@ -56,13 +56,13 @@ def apply_PM_function(time_step):
                                         u2_i = Ws_m.values,
                                         lat_i = LAT.values,
                                         z_i = Z.values)
-  
+  pm_eo_evap[pm_eo_evap < 0] = 0
   to_save = xr.open_dataset(file_path_grids + "co_variables/DEM.nc")
   to_save["eo"] = (('latitude', 'longitude'), pm_eo_evap)
   to_save["eo"].to_netcdf(file_path_grids + "eo/eo_" + time_step.strftime('%Y-%m-%d') + ".nc")
 
 
 # applying PM function
-Parallel(n_jobs=2, verbose=50)(
+Parallel(n_jobs=11, verbose=50)(
   delayed(apply_PM_function)(i) for i in range_time
   )

@@ -10,6 +10,11 @@ source('./src/from_PISCOt/Merging/MG_normal_anomaly_values.R')
 # data
 qc_data <- readRDS("./data/processed/obs/sd/qc_gf_hmg_sd_obs.RDS")
 
+# for cv
+# xyz_cv <- read.csv("./data/processed/obs/PISCOeo_pm_xyz_for_cv.csv")
+# qc_data$values <- qc_data$values[, match(as.character(xyz_cv$ID), colnames(qc_data$values))]
+# qc_data$xyz <- qc_data$xyz[match(as.character(xyz_cv$ID), as.character(qc_data$xyz$ID)), ]
+
 # grid data
 gridded_data <- raster::brick("./data/processed/gridded/co_variables/DEM.nc")[[1]]
 gridded_data_a <- raster::aggregate(gridded_data, 5)
